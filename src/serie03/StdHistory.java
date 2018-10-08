@@ -15,6 +15,7 @@ public class StdHistory<E> implements History<E>
 
     public StdHistory(int maxHeight)
     {
+        Contract.checkCondition(maxHeight > 0);
         this.maxHeight = maxHeight;
         this.currentPosition = 0;
         this.endPosition = 0;
