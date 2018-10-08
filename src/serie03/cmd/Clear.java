@@ -34,11 +34,6 @@ public class Clear extends AbstractCommand {
     public Clear(Text text) {
         super(text);
         this.backup = new LinkedList<String>();
-        String content = text.getContent();
-        String[] contentTab = content.split(System.getProperty(System.lineSeparator()));
-        for(String l : contentTab)
-            backup.add(l);
-
     }
     
     // REQUETES
@@ -62,6 +57,9 @@ public class Clear extends AbstractCommand {
      */
     @Override
     protected void doIt() {
+        Contract.checkCondition(this.canDo(), "You can't do this");
+        for(int i = 0; i < text.getLinesNb(); i++)
+            this.backup.add(text.getLine(i));
         this.text.clear();
     }
     
@@ -74,6 +72,7 @@ public class Clear extends AbstractCommand {
      */
     @Override
     protected void undoIt() {
+        Contract.checkCondition(this.canUndo(), "You can't undo it");
         for(int i = 0; i < backup.size(); i++)
             this.text.insertLine(i, backup.get(i));
     }
