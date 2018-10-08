@@ -67,8 +67,9 @@ public class StdEditor implements Editor
     public void insertLine(int numLine, String s)
     {
         Contract.checkCondition(s != null, "You can't add a null line");
-        Contract.checkCondition( 1 <= numLine + 1, "You can't add a " +
+        Contract.checkCondition( 1 <= numLine, "You can't add a " +
                 "line out of the text");
+        Contract.checkCondition(numLine <= this.getTextLinesNb() + 1);
         this.text.insertLine(numLine, s);
     }
 
@@ -86,6 +87,8 @@ public class StdEditor implements Editor
         Contract.checkCondition(this.nbOfPossibleRedo > 0, "Their is nothing to redo");
         this.history.goForward();
         this.history.getCurrentElement().act();
+        this.nbOfPossibleUndo++;
+        this.nbOfPossibleRedo--;
     }
 
     @Override
@@ -94,5 +97,7 @@ public class StdEditor implements Editor
         Contract.checkCondition(this.nbOfPossibleUndo > 0, "Their is nothing to undo");
         this.history.getCurrentElement().act();
         this.history.goBackward();
+        this.nbOfPossibleUndo--;
+        this.nbOfPossibleRedo++;
     }
 }
