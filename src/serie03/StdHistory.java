@@ -15,7 +15,7 @@ public class StdHistory<E> implements History<E>
 
     public StdHistory(int maxHeight)
     {
-        Contract.checkCondition(maxHeight > 0);
+        Contract.checkCondition(maxHeight > 0, "maxHeight must be > 0");
         this.maxHeight = maxHeight;
         this.currentPosition = 0;
         this.endPosition = 0;
@@ -23,42 +23,35 @@ public class StdHistory<E> implements History<E>
         this.tail = new LinkedList<E>();
     }
     @Override
-    public int getMaxHeight()
-    {
+    public int getMaxHeight() {
         return this.maxHeight;
     }
 
     @Override
-    public int getCurrentPosition()
-    {
-        Contract.checkCondition(this.currentPosition > 0, "You can't have a position under 0");
+    public int getCurrentPosition() {
+        Contract.checkCondition(this.currentPosition >= 0, "You can't have a position under 0");
         return this.currentPosition;
     }
 
     @Override
-    public E getCurrentElement()
-    {
-        Contract.checkCondition(this.currentPosition > 0, "Their is nothing in the queue");
+    public E getCurrentElement() {
+        Contract.checkCondition(this.currentPosition > 0, "There is nothing in the queue");
         return this.head.getFirst();
     }
 
     @Override
-    public int getEndPosition()
-    {
+    public int getEndPosition() {
         return this.endPosition;
     }
 
     @Override
-    public void add(E e)
-    {
+    public void add(E e) {
         Contract.checkCondition(e != null, "You can't add a null object to the queue");
-        if(this.currentPosition < this.maxHeight)
-        {
+        if(this.currentPosition < this.maxHeight) {
             head.addFirst(e);
             tail.clear();
         }
-        else
-        {
+        else {
             head.removeLast();
             head.addFirst(e);
             tail.clear();
@@ -69,18 +62,16 @@ public class StdHistory<E> implements History<E>
 
 
     @Override
-    public void goForward()
-    {
-        Contract.checkCondition(this.currentPosition < this.endPosition, "Their is nothing more forward");
+    public void goForward() {
+        Contract.checkCondition(this.currentPosition < this.endPosition, "There is nothing more forward");
         this.currentPosition++;
         this.head.add(this.tail.remove());
     }
 
     @Override
-    public void goBackward()
-    {
-        Contract.checkCondition(this.currentPosition > 0, "Their is nothing more backward");
-        this.currentPosition --;
+    public void goBackward() {
+        Contract.checkCondition(this.currentPosition > 0, "There is nothing more backward");
+        this.currentPosition--;
         this.tail.add(this.head.removeFirst());
     }
 }
