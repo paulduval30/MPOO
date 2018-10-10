@@ -16,6 +16,7 @@ public class StdEditor implements Editor
         this.history = new StdHistory<Command>(Editor.DEFAULT_HISTORY_SIZE);
         this.nbOfPossibleRedo = 0;
         this.nbOfPossibleUndo = 0;
+        this.text = new StdText();
     }
 
     public StdEditor(int historySize)

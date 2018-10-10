@@ -64,8 +64,8 @@ public class StdHistory<E> implements History<E>
     @Override
     public void goForward() {
         Contract.checkCondition(this.currentPosition < this.endPosition, "There is nothing more forward");
+        this.head.addFirst(this.tail.remove());
         this.currentPosition++;
-        this.head.add(this.tail.remove());
     }
 
     @Override
