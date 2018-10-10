@@ -65,6 +65,7 @@ public class StdEditor implements Editor
         c.act();
         this.history.add(c);
         this.nbOfPossibleUndo = Math.min(this.nbOfPossibleUndo + 1, this.getHistorySize());
+        System.out.println("CLER    undo " + this.nbOfPossibleUndo() + "redo " + this.nbOfPossibleRedo() +" " +  this.getHistorySize());
     }
 
     @Override
@@ -78,6 +79,7 @@ public class StdEditor implements Editor
         c.act();
         this.history.add(c);
         this.nbOfPossibleUndo = Math.min(this.nbOfPossibleUndo + 1, this.getHistorySize());
+        System.out.println("INSERT    " + "undo " + this.nbOfPossibleUndo()+ "redo " + this.nbOfPossibleRedo() +" " +  this.getHistorySize());
 
     }
 
@@ -90,26 +92,32 @@ public class StdEditor implements Editor
         c.act();
         this.history.add(c);
         this.nbOfPossibleUndo = Math.min(this.nbOfPossibleUndo + 1, this.getHistorySize());
+        System.out.println("DELET    " + "undo " + this.nbOfPossibleUndo() + "redo " + this.nbOfPossibleRedo() +" " +  this.getHistorySize());
+
 
     }
 
     @Override
     public void redo()
     {
-        Contract.checkCondition(this.nbOfPossibleRedo > 0, "Their is nothing to redo");
-        this.history.getCurrentElement().act();
+        System.out.println("REDO " + this.nbOfPossibleRedo);
+        Contract.checkCondition(this.nbOfPossibleRedo() > 0, "Their is nothing to redo");
         this.history.goForward();
+        this.history.getCurrentElement().act();
         this.nbOfPossibleUndo++;
         this.nbOfPossibleRedo--;
+        System.out.println("REDO     " + "undo " + this.nbOfPossibleUndo+ "redo " + this.nbOfPossibleRedo +" " +  this.getHistorySize());
     }
 
     @Override
     public void undo()
     {
-        Contract.checkCondition(this.nbOfPossibleUndo > 0, "Their is nothing to undo");
+        System.out.println("UNDO " + this.nbOfPossibleUndo());
+        Contract.checkCondition(this.nbOfPossibleUndo() > 0, "Their is nothing to undo");
         this.history.getCurrentElement().act();
         this.history.goBackward();
         this.nbOfPossibleUndo--;
         this.nbOfPossibleRedo++;
+        System.out.println("UNDO    : " + "undo " + this.nbOfPossibleUndo+ "redo " + this.nbOfPossibleRedo +" " +  this.getHistorySize());
     }
 }
