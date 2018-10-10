@@ -2,6 +2,8 @@ package serie03;
 
 import serie03.cmd.Clear;
 import serie03.cmd.Command;
+import serie03.cmd.DeleteLine;
+import serie03.cmd.InsertLine;
 import util.Contract;
 
 public class StdEditor implements Editor
@@ -62,6 +64,7 @@ public class StdEditor implements Editor
         Clear c = new Clear(this.text);
         c.act();
         this.history.add(c);
+        this.nbOfPossibleUndo = Math.min(this.nbOfPossibleUndo + 1, this.getHistorySize());
     }
 
     @Override
@@ -71,7 +74,11 @@ public class StdEditor implements Editor
         Contract.checkCondition( 1 <= numLine, "You can't add a " +
                 "line out of the text");
         Contract.checkCondition(numLine <= this.getTextLinesNb() + 1);
-        this.text.insertLine(numLine, s);
+        Command c = new InsertLine(this.text, numLine, s);
+        c.act();
+        this.history.add(c);
+        this.nbOfPossibleUndo = Math.min(this.nbOfPossibleUndo + 1, this.getHistorySize());
+
     }
 
     @Override
@@ -79,15 +86,19 @@ public class StdEditor implements Editor
     {
         Contract.checkCondition( 1 <= numLine && numLine <= getTextLinesNb()
         ,"You can't delet a line that doesn't exist");
-        this.text.deleteLine(numLine);
+        Command c = new DeleteLine(this.text, numLine);
+        c.act();
+        this.history.add(c);
+        this.nbOfPossibleUndo = Math.min(this.nbOfPossibleUndo + 1, this.getHistorySize());
+
     }
 
     @Override
     public void redo()
     {
         Contract.checkCondition(this.nbOfPossibleRedo > 0, "Their is nothing to redo");
-        this.history.goForward();
         this.history.getCurrentElement().act();
+        this.history.goForward();
         this.nbOfPossibleUndo++;
         this.nbOfPossibleRedo--;
     }
