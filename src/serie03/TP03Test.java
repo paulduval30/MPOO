@@ -10,7 +10,7 @@ public final class TP03Test {
         TPTester t = new TPTester(
                 serie03.cmd.ClearTest.class,
                 serie03.cmd.InsertLineTest.class,
-                serie03.StdHistoryTest.class,
+                StdHistoryTest.class,
                 serie03.StdEditorTest.class
         );
         int exitValue = t.runAll();
