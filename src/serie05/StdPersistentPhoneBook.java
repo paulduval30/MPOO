@@ -35,7 +35,7 @@ public class StdPersistentPhoneBook  extends StdPhoneBook implements PersistentP
     @Override
     public void setFile(File file)
     {
-        Contract.checkCondition(this.file != null, "Null file");
+        Contract.checkCondition(file != null, "Null file");
         this.file = file;
 
     }
@@ -64,7 +64,7 @@ public class StdPersistentPhoneBook  extends StdPhoneBook implements PersistentP
                 if(! matcher.matches())
                     throw new BadSyntaxException();
                 info = line.split(":");
-                civ = Civ.values()[Integer.parseInt(info[0])];
+                civ = Civ.values()[Integer.parseInt(info[0].trim())];
                 prenom = info[2];
                 nom = info[1];
                 Collections.addAll(nums, info[3].split(","));
@@ -75,13 +75,15 @@ public class StdPersistentPhoneBook  extends StdPhoneBook implements PersistentP
         }
         catch(Exception e)
         {
-            buff.close();
+            if(buff != null)
+                buff.close();
             this.clear();
             throw e;
         }
         finally
         {
-            buff.close();
+            if(buff != null)
+                buff.close();
         }
     }
 
@@ -103,7 +105,7 @@ public class StdPersistentPhoneBook  extends StdPhoneBook implements PersistentP
 
         try
         {
-            out = new BufferedWriter(new FileWriter("phonebook.txt"));
+            out = new BufferedWriter(new FileWriter(this.file));
             NavigableSet<Contact> contacts = this.contacts();
             for(Contact c : contacts)
             {
@@ -124,13 +126,15 @@ public class StdPersistentPhoneBook  extends StdPhoneBook implements PersistentP
         }
         catch(Exception e)
         {
-            out.close();
+            if(out != null)
+                out.close();
             throw e;
 
         }
         finally
         {
-            out.close();
+            if(out != null)
+              out.close();
         }
     }
 }
