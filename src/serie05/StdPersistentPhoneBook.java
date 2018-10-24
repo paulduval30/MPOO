@@ -57,20 +57,24 @@ public class StdPersistentPhoneBook  extends StdPhoneBook implements PersistentP
         try
         {
             buff = new BufferedReader(new FileReader(this.file));
-            String line;
+            String line = "";
             while((line = buff.readLine()) != null)
             {
+                System.out.println(line);
                 matcher = PersistentPhoneBook.LINE_RECOGNIZER.matcher(line);
                 if(! matcher.matches())
                     throw new BadSyntaxException();
                 info = line.split(":");
                 civ = Civ.values()[Integer.parseInt(info[0].trim())];
-                prenom = info[2];
-                nom = info[1];
+                prenom = info[2].trim();
+                nom = info[1].trim();
                 Collections.addAll(nums, info[3].split(","));
 
                 StdContact tempCont = new StdContact(civ, nom, prenom);
                 this.addEntry(tempCont, nums);
+
+                nums = new ArrayList<String>();
+
             }
         }
         catch(Exception e)
@@ -105,24 +109,23 @@ public class StdPersistentPhoneBook  extends StdPhoneBook implements PersistentP
 
         try
         {
+            String write = "";
             out = new BufferedWriter(new FileWriter(this.file));
             NavigableSet<Contact> contacts = this.contacts();
             for(Contact c : contacts)
             {
-                String write = c.getCivility().ordinal() + ":";
+                write += c.getCivility().ordinal() + ":";
                 write += c.getLastName() + ":";
                 write += c.getFirstName() + ":";
-                for(String s : this.phoneNumbers(c))
-                {
-                    write += s + ",";
-                }
+                if(this.phoneNumbers(c).size() > 1)
+                    write += this.phoneNumbers(c).get(0);
+                for(int i = 1; i < this.phoneNumbers(c).size(); i++)
+                    write += "," + this.phoneNumbers(c).get(i);
 
-                write += System.getProperty(System.lineSeparator());
-
-                out.write(write);
-
-                write = "";
+                write += "\n";
             }
+
+            out.write(write);
         }
         catch(Exception e)
         {
