@@ -1,18 +1,31 @@
 package serie05;
 
+import serie04.Civ;
 import serie04.Contact;
+import serie04.StdContact;
+import serie04.StdPhoneBook;
 import util.Contract;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
 
-public class StdPersistentPhoneBook implements PersistentPhoneBook
+public class StdPersistentPhoneBook  extends StdPhoneBook implements PersistentPhoneBook
 {
 
-    private Map<Contact, List<String>> annuaire;
-
     private File file;
+
+    public StdPersistentPhoneBook(File file)
+    {
+        super();
+        this.file = file;
+    }
+
+    public StdPersistentPhoneBook()
+    {
+        super();
+    }
+
     @Override
     public File getFile()
     {
@@ -24,224 +37,100 @@ public class StdPersistentPhoneBook implements PersistentPhoneBook
     {
         Contract.checkCondition(this.file != null, "Null file");
         this.file = file;
+
     }
 
     @Override
     public void load() throws IOException, BadSyntaxException
     {
+        Contract.checkCondition(file != null, "null file");
+        this.clear();
+        BufferedReader buff = null;
+        Contract.checkCondition(this.file != null);
+        String[] info;
+        Civ civ;
+        String prenom;
+        String nom;
+        ArrayList<String> nums = new ArrayList<String>();
+
+        Matcher matcher;
         try
         {
+            buff = new BufferedReader(new FileReader(this.file));
+            String line;
+            while((line = buff.readLine()) != null)
+            {
+                matcher = PersistentPhoneBook.LINE_RECOGNIZER.matcher(line);
+                if(! matcher.matches())
+                    throw new BadSyntaxException();
+                info = line.split(":");
+                civ = Civ.values()[Integer.parseInt(info[0])];
+                prenom = info[2];
+                nom = info[1];
+                Collections.addAll(nums, info[3].split(","));
 
+                StdContact tempCont = new StdContact(civ, nom, prenom);
+                this.addEntry(tempCont, nums);
+            }
         }
-        catch (Exception e)
+        catch(Exception e)
         {
-            e.printStackTrace();
+            buff.close();
+            this.clear();
+            throw e;
+        }
+        finally
+        {
+            buff.close();
         }
     }
 
+    /**<li>Une ligne est constituée, dans cet ordre,
+ *       <ol>
+ *          <li>d'un entier entre 0 et le nombre de civilités moins une
+        *              suivi du caractère ':'</li>
+        *          <li>d'un nom suivi du caractère ':'</li>
+        *          <li>d'un prénom suivi du caractère ':'</li>
+        *          <li>d'un numéro de téléphone</li>
+        *          <li>[d'une virgule suivie d'un numéro de téléphone]*</li>
+        *       </ol>
+        *    </li>*/
     @Override
     public void save() throws IOException
     {
+        Contract.checkCondition(file != null, "null file");
+        BufferedWriter out = null;
 
-    }
+        try
+        {
+            out = new BufferedWriter(new FileWriter("phonebook.txt"));
+            NavigableSet<Contact> contacts = this.contacts();
+            for(Contact c : contacts)
+            {
+                String write = c.getCivility().ordinal() + ":";
+                write += c.getLastName() + ":";
+                write += c.getFirstName() + ":";
+                for(String s : this.phoneNumbers(c))
+                {
+                    write += s + ",";
+                }
 
-    @Override
-    public String firstPhoneNumber(Contact p) {
-        Contract.checkCondition(p != null, "Le contact ne peut pas être nul.");
-        Contract.checkCondition(contains(p), "Le contact n'est pas dans l'annuaire.");
+                write += System.getProperty(System.lineSeparator());
 
-        return annuaire.get(p).get(0);
-    }
+                out.write(write);
 
-    /**
-     * Retourne une vue non modifiable de la liste des numéros de p.
-     * Cette liste est partagée avec l'annuaire de sorte que tout changement
-     *  ultérieur dans l'annuaire a une incidence observable sur cette liste.
-     * @pre <pre>
-     *     (p != null) && contains(p) </pre>
-     */
-    @Override
-    public List<String> phoneNumbers(Contact p) {
-        Contract.checkCondition(p != null && contains(p), "Le contact est introuvable.");
-
-        List<String> numsTel = annuaire.get(p);
-        numsTel = Collections.unmodifiableList(numsTel);
-
-        return numsTel;
-    }
-
-    /**
-     * Retourne une vue ordonnée des personnes contenues dans l'annuaire.
-     * Les ajouts sur cet ensemble sont impossibles.
-     * Cet ensemble est partagé avec l'annuaire de sorte que le retrait d'un
-     *  élément de cet ensemble entraine la suppression dans l'annuaire de
-     *  l'entrée correspondante.
-     * Dans l'autre sens, tout ajout ou toute suppression d'entrée dans
-     *  l'annuaire entraine l'ajout ou la suppression du contact correspondant
-     *  dans cet ensemble.
-     */
-    @Override
-    public NavigableSet<Contact> contacts() {
-        NavigableSet<Contact> ns = (NavigableSet<Contact>) annuaire.keySet();
-        Collections.unmodifiableSet(ns);
-        return ns;
-    }
-
-    /**
-     * Retourne vrai ssi p est dans l'annuaire.
-     * @pre <pre>
-     *     p != null </pre>
-     */
-    @Override
-    public boolean contains(Contact p) {
-        Contract.checkCondition(p != null, "Le contact ne peut pas être null.");
-        return annuaire.containsKey(p);
-    }
-
-    /**
-     * Retourne vrai ssi l'annuaire est vide.
-     */
-    @Override
-    public boolean isEmpty() {
-        return annuaire.size() == 0;
-    }
-
-    /**
-     * Ajoute une nouvelle entrée dans l'annuaire.
-     * L'ordre initial des numéros est préservé.
-     * Dans le cas où un numéro serait présent plusieurs fois dans nums, seule
-     *  la première occurrence (en partant de la gauche) sera conservée.
-     * @pre <pre>
-     *     (p != null) && !contains(p)
-     *     (nums != null) && (nums.size() > 0) </pre>
-     * @post <pre>
-     *     Soit list ::= phoneNumbers(p)
-     *          forall x : list_x ::= phoneNumbers(p).get(x)
-     *          forall x : nums_x ::= nums.get(x)
-     *     contains(p)
-     *     forall n:[0..|nums| - 1], exist i:[0..|list| - 1] :
-     *         i <= n && list_i.equals(nums_n)
-     *         forall j:[0..|list| - 1] : j != i ==> !list_j.equals(list_i)
-     *     forall m, n, i, j : list_i.equals(nums_m) && list_j.equals(nums_n)
-     *         m < n ==> i <= j </pre>
-     */
-    @Override
-    public void addEntry(Contact p, List<String> nums) {
-        Contract.checkCondition(p != null && !contains(p), "Impossible d'ajouter ce contact.");
-        Contract.checkCondition(nums != null && nums.size() > 0, "Impossible d'ajouter ce(s) numéro(s).");
-
-        List<String> numFinal = new ArrayList<String>();
-
-        for(String s : nums) {
-            if(!numFinal.contains(s)) {
-                numFinal.add(s);
+                write = "";
             }
         }
+        catch(Exception e)
+        {
+            out.close();
+            throw e;
 
-        annuaire.put(p, numFinal);
-    }
-
-    /**
-     * Ajoute un numéro à la fin de la liste des numéros d'un contact.
-     * Si la personne n'existe pas, une nouvelle entrée est créée pour cette
-     *  personne avec la liste constituée du numéro passé en paramètre.
-     * Ne fait rien si le numéro est déjà dans la liste de p.
-     * @pre <pre>
-     *     p != null
-     *     (n != null) && !n.equals("") </pre>
-     * @post <pre>
-     *     contains(p)
-     *     !old contains(p)
-     *         ==> phoneNumbers(p).size() == 1
-     *             firstPhoneNumber(p).equals(n)
-     *     old contains(p)
-     *         ==> Soit oldSize ::= old phoneNumbers(p).size()
-     *             !old phoneNumbers(p).contains(n)
-     *                 ==> phoneNumbers(p).size() == oldSize + 1
-     *                     phoneNumbers(p).indexOf(n) == oldSize </pre>
-     */
-    @Override
-    public void addPhoneNumber(Contact p, String n) {
-        Contract.checkCondition(p != null, "Le contact est introuvable.");
-        Contract.checkCondition(n != null && !n.equals(""), "Le numéro n'est pas valide.");
-
-        if(contains(p)) {
-            ArrayList<String> verif = (ArrayList<String>) annuaire.get(p);
-            if(!verif.contains(n)) {
-                verif.add(n);
-                annuaire.put(p, verif);
-            }
         }
-        else {
-            ArrayList<String> tmp = new ArrayList<String>();
-            tmp.add(n);
-            annuaire.put(p, tmp);
+        finally
+        {
+            out.close();
         }
-
-    }
-
-    /**
-     * Supprime un contact de l'annuaire.
-     * @pre <pre>
-     *     (p != null) && contains(p) </pre>
-     * @post <pre>
-     *     !contains(p) </pre>
-     */
-    @Override
-    public void removeEntry(Contact p) {
-        Contract.checkCondition(p != null && contains(p), "Le contact est introuvable.");
-
-        annuaire.remove(p);
-    }
-
-    /**
-     * Supprime un numéro donné pour un contact donné.
-     * Si ce numéro est le seul numéro de la personne, l'entrée complète est
-     *  retirée de l'annuaire.
-     * Si ce numéro était le premier, l'ancien second devient le nouveau
-     *  premier.
-     * Ne fait rien si le numéro n'est pas dans la liste des numéros de p.
-     * @pre <pre>
-     *     (p != null) && contains(p)
-     *     (n != null) && !n.equals("") </pre>
-     * @post <pre>
-     *     old phoneNumbers(p).contains(n)
-     *         ==> old phoneNumbers(p).size() == 1
-     *                 ==> !contains(p)
-     *             old phoneNumbers(p).size() > 1
-     *                 ==> Soit oldSize ::= old phoneNumbers(p).size()
-     *                     Soit oldIndex ::= old  phoneNumbers(p).indexOf(n)
-     *                     phoneNumbers(p).size() == oldSize - 1
-     *                     forall i:[oldIndex..phoneNumbers(p).size() - 1] :
-     *                         phoneNumbers(p).get(i).equals(
-     *                             old phoneNumbers(p).get(i + 1)
-     *                         ) </pre>
-     */
-    @Override
-    public void deletePhoneNumber(Contact p, String n) {
-        Contract.checkCondition(p != null && contains(p), "Le contact est introuvable.");
-        Contract.checkCondition(n != null && !n.equals(""), "Le numéro n'est pas valide.");
-
-        ArrayList<String> tmp = (ArrayList<String>) annuaire.get(p);
-
-        for(int i = 0; i < tmp.size(); i++){
-            if(tmp.get(i).equals(n)){
-                tmp.remove(i);
-            }
-        }
-        if(tmp.size() == 0)
-            annuaire.remove(p);
-        else
-            annuaire.put(p, tmp);
-    }
-
-    /**
-     * Réinitialise l'annuaire.
-     * @post <pre>
-     *     isEmpty() </pre>
-     */
-    @Override
-    public void clear() {
-        annuaire.clear();
     }
 }
