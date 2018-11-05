@@ -60,7 +60,6 @@ public class StdPersistentPhoneBook  extends StdPhoneBook implements PersistentP
             String line = "";
             while((line = buff.readLine()) != null)
             {
-                System.out.println(line);
                 matcher = PersistentPhoneBook.LINE_RECOGNIZER.matcher(line);
                 if(! matcher.matches())
                     throw new BadSyntaxException();
