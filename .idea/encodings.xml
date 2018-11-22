@@ -23,5 +23,13 @@
     <file url="file://$PROJECT_DIR$/src/serie04/Contact.java" charset="ISO-8859-1" />
     <file url="file://$PROJECT_DIR$/src/serie04/PhoneBook.java" charset="ISO-8859-1" />
     <file url="file://$PROJECT_DIR$/src/serie05/PersistentPhoneBook.java" charset="ISO-8859-1" />
+    <file url="file://$PROJECT_DIR$/src/serie06/DrinksMachineModel.java" charset="ISO-8859-1" />
+    <file url="file://$PROJECT_DIR$/src/serie06/MoneyAmount.java" charset="ISO-8859-1" />
+    <file url="file://$PROJECT_DIR$/src/serie06/Stock.java" charset="ISO-8859-1" />
+    <file url="file://$PROJECT_DIR$/src/serie07/ObservableModel.java" charset="ISO-8859-1" />
+    <file url="file://$PROJECT_DIR$/src/serie07/RainbowModel.java" charset="ISO-8859-1" />
+    <file url="file://$PROJECT_DIR$/src/serie07/SlotModel.java" charset="ISO-8859-1" />
+    <file url="file://$PROJECT_DIR$/src/serie07/StdRainbowModel.java" charset="ISO-8859-1" />
+    <file url="file://$PROJECT_DIR$/src/serie07/SwellingModel.java" charset="ISO-8859-1" />
   </component>
 </project>
