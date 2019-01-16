@@ -113,7 +113,7 @@ public class StdSplitManager implements SplitManager {
 	
 	@Override
 	public void setSplitsNumber(int number) {
-		Contract.checkCondition(canSplit(), "lFile not splitable");
+		Contract.checkCondition(canSplit(), "File not splitable");
 		Contract.checkCondition(number >= 1, "Not enought split");
 		Contract.checkCondition(getMaxFragmentNb() >= number, "tpp much split");
 		

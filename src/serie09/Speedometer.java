@@ -14,13 +14,12 @@ public class Speedometer
     private SpeedometerModel model;
     private JRadioButton km;
     private JRadioButton mi;
-    private ButtonGroup grp;
     private GraphicSpeedometer speed;
     private JButton moins;
     private JButton plus;
     private JButton turn;
 
-    JFrame main;
+    private JFrame main;
 
     public Speedometer()
     {
@@ -33,6 +32,66 @@ public class Speedometer
     private void createController()
     {
         main.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        ActionListener act = new ActionListener()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                if(e.getSource() == km){
+                    model.setUnit(SpeedometerModel.SpeedUnit.KMH);
+                }
+                else
+                    model.setUnit(SpeedometerModel.SpeedUnit.MIH);
+            }
+        };
+        km.addActionListener(act);
+        mi.addActionListener(act);
+
+        act = new ActionListener()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                if(e.getSource() == moins)
+                    model.slowDown();
+                else
+                    model.speedUp();
+            }
+        };
+        moins.addActionListener(act);
+        plus.addActionListener(act);
+
+        act = new ActionListener()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                if(model.isOn())
+                {
+                    turn.setText("Turn on");
+                    model.turnOff();
+                    moins.setEnabled(false);
+                    plus.setEnabled(false);
+                }
+                else
+                {
+                    turn.setText("Turn Off");
+                    model.turnOn();
+                    moins.setEnabled(true);
+                    plus.setEnabled(true);
+                }
+            }
+        };
+        turn.addActionListener(act);
+        model.addObserver(new Observer()
+        {
+            @Override
+            public void update(Observable o, Object arg)
+            {
+                refresh();
+            }
+        });
     }
 
     private void placeComponents()
@@ -62,7 +121,7 @@ public class Speedometer
 
     }
 
-    public void display() {
+    private void display() {
         refresh();
         main.pack();
         main.setLocationRelativeTo(null);
@@ -76,75 +135,25 @@ public class Speedometer
 
     private void createView()
     {
-        ActionListener act = new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                if(e.getSource() == km){
-                    model.setUnit(SpeedometerModel.SpeedUnit.KMH);
-                }
-                else
-                    model.setUnit(SpeedometerModel.SpeedUnit.MIH);
-            }
-        };
+
 
         main = new JFrame();
-        grp = new ButtonGroup();
-
+        ButtonGroup grp = new ButtonGroup();
         km = new JRadioButton("km/h");
-        km.addActionListener(act);
-
         mi = new JRadioButton("mi/h");
-        mi.addActionListener(act);
-
         grp.add(km);
         grp.add(mi);
-
         km.setSelected(true);
 
-        act = new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                if(e.getSource() == moins)
-                    model.slowDown();
-                else
-                    model.speedUp();
-            }
-        };
+
         this.moins = new JButton("moins");
-        moins.addActionListener(act);
         moins.setEnabled(false);
 
         this.plus = new JButton("plus");
-        plus.addActionListener(act);
         plus.setEnabled(false);
 
-        act = new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                if(model.isOn())
-                {
-                    turn.setText("Turn on");
-                    model.turnOff();
-                    moins.setEnabled(false);
-                    plus.setEnabled(false);
-                }
-                else
-                {
-                    turn.setText("Turn Off");
-                    model.turnOn();
-                    moins.setEnabled(true);
-                    plus.setEnabled(true);
-                }
-            }
-        };
+
         this.turn = new JButton("Turn on");
-        turn.addActionListener(act);
 
         this.speed = new GraphicSpeedometer(this.model, new Dimension(500,500));
     }
@@ -152,14 +161,7 @@ public class Speedometer
     private void createModel()
     {
         this.model = new StdSpeedometerModel(10, 150);
-        model.addObserver(new Observer()
-        {
-            @Override
-            public void update(Observable o, Object arg)
-            {
-                refresh();
-            }
-        });
+
     }
 
     public static void main(String[] argv)
