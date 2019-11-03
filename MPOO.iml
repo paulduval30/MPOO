@@ -35,5 +35,6 @@
         <jarDirectory url="file://$MODULE_DIR$/lib" recursive="false" type="SOURCES" />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="CrazyCircus_obf" level="project" />
   </component>
 </module>

@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="CrazyCircus_obf">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/CrazyCircus_obf.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
